@@ -2,8 +2,11 @@
   "name": "@taranti/recenzo",
   "version": "1.0.0",
   "description": "Recenzo is a JS/TS library for custom AI powered Bitbucket code reviews. Fetch PR diffs, analyze changes, and automate reviewer feedback to enforce standards.",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "private": false,
   "scripts": {
+    "prepublish": "npm run test && npm run build",
     "lint": "npx eslint --fix . && npx prettier --write --log-level warn .",
     "lint:check": "npx eslint . && npx prettier --check --log-level warn .",
     "test": "npx vitest",
