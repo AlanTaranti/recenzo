@@ -1,0 +1,38 @@
+{
+  "name": "@taranti/recenzo",
+  "version": "1.0.0",
+  "description": "Recenzo is a JS/TS library for custom AI powered Bitbucket code reviews. Fetch PR diffs, analyze changes, and automate reviewer feedback to enforce standards.",
+  "main": "index.js",
+  "scripts": {
+    "test": "npx vitest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AlanTaranti/recenzo.git"
+  },
+  "keywords": [
+    "recenzo",
+    "ai",
+    "bitbucket",
+    "code",
+    "review"
+  ],
+  "author": "Alan Taranti",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/AlanTaranti/recenzo/issues"
+  },
+  "homepage": "https://github.com/AlanTaranti/recenzo#readme",
+  "devDependencies": {
+    "@tsconfig/node22": "^22.0.2",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.2",
+    "prettier": "^3.6.2",
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.4"
+  },
+  "dependencies": {
+    "openai": "^5.8.2",
+    "zod": "^3.25.67"
+  }
+}
