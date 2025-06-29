@@ -4,6 +4,8 @@
   "description": "Recenzo is a JS/TS library for custom AI powered Bitbucket code reviews. Fetch PR diffs, analyze changes, and automate reviewer feedback to enforce standards.",
   "main": "index.js",
   "scripts": {
+    "lint": "npx eslint .",
+    "lint:check": "npx eslint --fix .",
     "test": "npx vitest"
   },
   "repository": {
@@ -24,11 +26,15 @@
   },
   "homepage": "https://github.com/AlanTaranti/recenzo#readme",
   "devDependencies": {
+    "@eslint/js": "^9.30.0",
     "@tsconfig/node22": "^22.0.2",
+    "eslint": "^9.30.0",
+    "globals": "^16.2.0",
     "husky": "^9.1.7",
     "lint-staged": "^16.1.2",
     "prettier": "^3.6.2",
     "typescript": "^5.8.3",
+    "typescript-eslint": "^8.35.0",
     "vitest": "^3.2.4"
   },
   "dependencies": {
