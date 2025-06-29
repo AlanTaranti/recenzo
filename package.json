@@ -4,9 +4,10 @@
   "description": "Recenzo is a JS/TS library for custom AI powered Bitbucket code reviews. Fetch PR diffs, analyze changes, and automate reviewer feedback to enforce standards.",
   "main": "index.js",
   "scripts": {
-    "lint": "npx eslint .",
-    "lint:check": "npx eslint --fix .",
-    "test": "npx vitest"
+    "lint": "npx eslint --fix . && npx prettier --write --log-level warn .",
+    "lint:check": "npx eslint . && npx prettier --check --log-level warn .",
+    "test": "npx vitest",
+    "prepare": "husky"
   },
   "repository": {
     "type": "git",
@@ -40,5 +41,13 @@
   "dependencies": {
     "openai": "^5.8.2",
     "zod": "^3.25.67"
+  },
+  "lint-staged": {
+    "**/*": [
+      "prettier --write --ignore-unknown"
+    ],
+    "**/*.ts": [
+      "eslint --fix"
+    ]
   }
 }
