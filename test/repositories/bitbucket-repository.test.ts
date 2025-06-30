@@ -64,7 +64,7 @@ describe('BitbucketRepository', () => {
     });
   });
 
-  describe('getSourceDiff', () => {
+  describe('getSourceCodeDiff', () => {
     it('should fetch diff from Bitbucket API with correct URL and headers', async () => {
       // Setup
       const mockResponse = new Response('mock diff content');
@@ -75,7 +75,7 @@ describe('BitbucketRepository', () => {
       const repository = new BitbucketRepository();
 
       // Execute
-      const result = await repository.getSourceDiff('workspace', 'repo', 'source-hash', 'dest-hash');
+      const result = await repository.getSourceCodeDiff('workspace', 'repo', 'source-hash', 'dest-hash');
 
       // Verify
       expect(global.fetch).toHaveBeenCalledWith(
@@ -100,7 +100,7 @@ describe('BitbucketRepository', () => {
       const repository = new BitbucketRepository(options);
 
       // Execute
-      await repository.getSourceDiff('workspace', 'repo', 'source-hash', 'dest-hash');
+      await repository.getSourceCodeDiff('workspace', 'repo', 'source-hash', 'dest-hash');
 
       // Verify
       expect(global.fetch).toHaveBeenCalledWith(
@@ -122,7 +122,7 @@ describe('BitbucketRepository', () => {
       const repository = new BitbucketRepository();
 
       // Execute & Verify
-      await expect(repository.getSourceDiff('workspace', 'repo', 'source-hash', 'dest-hash')).rejects.toThrow('Network error');
+      await expect(repository.getSourceCodeDiff('workspace', 'repo', 'source-hash', 'dest-hash')).rejects.toThrow('Network error');
     });
   });
 });
