@@ -10,6 +10,7 @@
     "lint": "npx eslint --fix . && npx prettier --write --log-level warn .",
     "lint:check": "npx eslint . && npx prettier --check --log-level warn .",
     "test": "npx vitest run",
+    "killMutants": "npx stryker run",
     "prepare": "husky"
   },
   "repository": {
