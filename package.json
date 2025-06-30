@@ -9,7 +9,7 @@
     "prepublishOnly": "npm run test && npm run build",
     "lint": "npx eslint --fix . && npx prettier --write --log-level warn .",
     "lint:check": "npx eslint . && npx prettier --check --log-level warn .",
-    "test": "npx vitest",
+    "test": "npx vitest run",
     "prepare": "husky"
   },
   "repository": {
@@ -33,6 +33,7 @@
     "@eslint/js": "^9.30.0",
     "@tsconfig/node22": "^22.0.2",
     "@types/node": "^22.15.34",
+    "@vitest/coverage-v8": "^3.2.4",
     "eslint": "^9.30.0",
     "globals": "^16.2.0",
     "husky": "^9.1.7",
