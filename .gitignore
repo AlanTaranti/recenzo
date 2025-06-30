@@ -223,3 +223,7 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
+
+# stryker temp files
+.stryker-tmp
+reports/
