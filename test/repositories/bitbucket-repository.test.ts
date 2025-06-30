@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { BitbucketRepository } from '../../src/repositories/bitbucket-repository';
+import { BitbucketRepository } from '~/repositories/bitbucket-repository';
 
 describe('BitbucketRepository', () => {
   // Store original environment variables to restore after tests
