@@ -7,18 +7,19 @@ export class BitbucketRepository {
   private readonly baseUrl = 'https://api.bitbucket.org/2.0/repositories/';
 
   constructor(private readonly options?: Options) {}
-  get openai_api_key(): string {
-    if (this.options?.openai_api_key) {
-      return this.options.openai_api_key;
-    }
 
-    if (process.env['OPENAI_API_KEY']) {
-      return process.env['OPENAI_API_KEY'];
-    }
-    throw new Error('OPENAI_API_KEY is not set');
-  }
+  // private get openai_api_key(): string {
+  //   if (this.options?.openai_api_key) {
+  //     return this.options.openai_api_key;
+  //   }
+  //
+  //   if (process.env['OPENAI_API_KEY']) {
+  //     return process.env['OPENAI_API_KEY'];
+  //   }
+  //   throw new Error('OPENAI_API_KEY is not set');
+  // }
 
-  get bitbucket_access_token(): string {
+  private get bitbucket_access_token(): string {
     if (this.options?.bitbucket_access_token) {
       return this.options.bitbucket_access_token;
     }
