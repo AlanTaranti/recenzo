@@ -29,7 +29,7 @@ export class BitbucketRepository {
     throw new Error('BITBUCKET_ACCESS_TOKEN is not set');
   }
 
-  public async gettSourceDiff(
+  public async getSourceDiff(
     workspace: string,
     repository: string,
     sourceCommitHash: string,
