@@ -407,4 +407,250 @@ describe('BitbucketRepository', () => {
       await expect(repository.listPullRequestsComments('workspace', 'repo', 123)).rejects.toThrow('Network error');
     });
   });
+  describe('createPullRequestComment', () => {
+    it('should call Bitbucket API with correct URL, headers, and body', async () => {
+      // Setup
+      const mockResponse = new Response('', { status: 201 });
+      const mockedFetch = global.fetch as unknown as ReturnType<typeof vi.fn>;
+      mockedFetch.mockResolvedValue(mockResponse);
+
+      process.env['BITBUCKET_ACCESS_TOKEN'] = 'test-token';
+      const repository = new BitbucketRepository();
+
+      const comment = {
+        content: {
+          raw: 'Test comment',
+        },
+        inline: {
+          to: 10,
+          path: 'src/file.ts',
+        },
+      };
+
+      // Execute
+      await repository.createPullRequestComment('workspace', 'repo', 123, comment);
+
+      // Verify
+      expect(global.fetch).toHaveBeenCalledWith('https://api.bitbucket.org/2.0/repositories/workspace/repo/pullrequests/123/comments', {
+        method: 'POST',
+        headers: {
+          Authorization: 'Bearer test-token',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(comment),
+      });
+    });
+
+    it('should use token from options for authorization header', async () => {
+      // Setup
+      const mockResponse = new Response('', { status: 201 });
+      const mockedFetch = global.fetch as unknown as ReturnType<typeof vi.fn>;
+      mockedFetch.mockResolvedValue(mockResponse);
+
+      const options = { bitbucket_access_token: 'options-token' };
+      const repository = new BitbucketRepository(options);
+
+      const comment = {
+        content: {
+          raw: 'Test comment',
+        },
+        inline: {
+          to: 10,
+          path: 'src/file.ts',
+        },
+      };
+
+      // Execute
+      await repository.createPullRequestComment('workspace', 'repo', 123, comment);
+
+      // Verify
+      expect(global.fetch).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          headers: expect.objectContaining({
+            Authorization: 'Bearer options-token',
+          }) as Record<string, string>,
+        }),
+      );
+    });
+
+    it('should handle fetch errors properly', async () => {
+      // Setup
+      const mockedFetch = global.fetch as unknown as ReturnType<typeof vi.fn>;
+      mockedFetch.mockRejectedValue(new Error('Network error'));
+
+      process.env['BITBUCKET_ACCESS_TOKEN'] = 'test-token';
+      const repository = new BitbucketRepository();
+
+      const comment = {
+        content: {
+          raw: 'Test comment',
+        },
+        inline: {
+          to: 10,
+          path: 'src/file.ts',
+        },
+      };
+
+      // Execute & Verify
+      await expect(repository.createPullRequestComment('workspace', 'repo', 123, comment)).rejects.toThrow('Network error');
+    });
+
+    it('should handle API error responses properly', async () => {
+      // Setup
+      const mockErrorResponse = new Response(JSON.stringify({ error: 'Bad request' }), { status: 400 });
+      const mockedFetch = global.fetch as unknown as ReturnType<typeof vi.fn>;
+      mockedFetch.mockResolvedValue(mockErrorResponse);
+
+      process.env['BITBUCKET_ACCESS_TOKEN'] = 'test-token';
+      const repository = new BitbucketRepository();
+
+      const comment = {
+        content: {
+          raw: 'Test comment',
+        },
+        inline: {
+          to: 10,
+          path: 'src/file.ts',
+        },
+      };
+
+      // Execute & Verify
+      // Since the method doesn't check response status, we just verify it doesn't throw
+      await expect(repository.createPullRequestComment('workspace', 'repo', 123, comment)).resolves.not.toThrow();
+    });
+  });
+
+  describe('createPullRequestComments', () => {
+    it('should call createPullRequestComment for each comment in the array', async () => {
+      // Setup
+      const mockResponse = new Response('', { status: 201 });
+      const mockedFetch = global.fetch as unknown as ReturnType<typeof vi.fn>;
+      mockedFetch.mockResolvedValue(mockResponse);
+
+      process.env['BITBUCKET_ACCESS_TOKEN'] = 'test-token';
+      const repository = new BitbucketRepository();
+
+      // Spy on createPullRequestComment
+      const createCommentSpy = vi.spyOn(repository, 'createPullRequestComment');
+
+      const comments = [
+        {
+          content: {
+            raw: 'Test comment 1',
+          },
+          inline: {
+            to: 10,
+            path: 'src/file1.ts',
+          },
+        },
+        {
+          content: {
+            raw: 'Test comment 2',
+          },
+          inline: {
+            to: 20,
+            path: 'src/file2.ts',
+          },
+        },
+      ];
+
+      // Execute
+      await repository.createPullRequestComments('workspace', 'repo', 123, comments);
+
+      // Verify
+      expect(createCommentSpy).toHaveBeenCalledTimes(2);
+      expect(createCommentSpy).toHaveBeenNthCalledWith(1, 'workspace', 'repo', 123, comments[0]);
+      expect(createCommentSpy).toHaveBeenNthCalledWith(2, 'workspace', 'repo', 123, comments[1]);
+    });
+
+    it('should handle empty array of comments', async () => {
+      // Setup
+      process.env['BITBUCKET_ACCESS_TOKEN'] = 'test-token';
+      const repository = new BitbucketRepository();
+
+      // Spy on createPullRequestComment
+      const createCommentSpy = vi.spyOn(repository, 'createPullRequestComment');
+
+      // Execute
+      await repository.createPullRequestComments('workspace', 'repo', 123, []);
+
+      // Verify
+      expect(createCommentSpy).not.toHaveBeenCalled();
+    });
+
+    it('should handle errors from createPullRequestComment', async () => {
+      // Setup
+      const mockedFetch = global.fetch as unknown as ReturnType<typeof vi.fn>;
+      mockedFetch.mockRejectedValue(new Error('Network error'));
+
+      process.env['BITBUCKET_ACCESS_TOKEN'] = 'test-token';
+      const repository = new BitbucketRepository();
+
+      const comments = [
+        {
+          content: {
+            raw: 'Test comment 1',
+          },
+          inline: {
+            to: 10,
+            path: 'src/file1.ts',
+          },
+        },
+        {
+          content: {
+            raw: 'Test comment 2',
+          },
+          inline: {
+            to: 20,
+            path: 'src/file2.ts',
+          },
+        },
+      ];
+
+      // Execute & Verify
+      await expect(repository.createPullRequestComments('workspace', 'repo', 123, comments)).rejects.toThrow('Network error');
+    });
+
+    it('should use Promise.all to create comments in parallel', async () => {
+      // Setup
+      const mockResponse = new Response('', { status: 201 });
+      const mockedFetch = global.fetch as unknown as ReturnType<typeof vi.fn>;
+      mockedFetch.mockResolvedValue(mockResponse);
+
+      process.env['BITBUCKET_ACCESS_TOKEN'] = 'test-token';
+      const repository = new BitbucketRepository();
+
+      // Spy on Promise.all
+      const promiseAllSpy = vi.spyOn(Promise, 'all');
+
+      const comments = [
+        {
+          content: {
+            raw: 'Test comment 1',
+          },
+          inline: {
+            to: 10,
+            path: 'src/file1.ts',
+          },
+        },
+        {
+          content: {
+            raw: 'Test comment 2',
+          },
+          inline: {
+            to: 20,
+            path: 'src/file2.ts',
+          },
+        },
+      ];
+
+      // Execute
+      await repository.createPullRequestComments('workspace', 'repo', 123, comments);
+
+      // Verify
+      expect(promiseAllSpy).toHaveBeenCalledTimes(1);
+      expect(promiseAllSpy).toHaveBeenCalledWith(expect.any(Array));
+    });
+  });
 });

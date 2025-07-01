@@ -16,12 +16,22 @@ type PullRequest = {
   };
 };
 
-type PullRequestComment = {
+export type PullRequestComment = {
   id: number;
   content: {
     raw: string;
   };
   inline?: {
+    to: number;
+    path: string;
+  };
+};
+
+export type PullRequestCreateComment = {
+  content: {
+    raw: string;
+  };
+  inline: {
     to: number;
     path: string;
   };
@@ -106,5 +116,33 @@ export class BitbucketRepository {
     });
 
     return response.text();
+  }
+
+  public async createPullRequestComment(
+    workspace: string,
+    repository: string,
+    pullRequestId: number,
+    comments: PullRequestCreateComment,
+  ): Promise<void> {
+    const url = `${this.baseUrl}${workspace}/${repository}/pullrequests/${pullRequestId.toString()}/comments`;
+
+    await fetch(url, {
+      method: 'POST',
+      headers: {
+        ...this.defaultHeaders,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(comments),
+    });
+  }
+
+  public async createPullRequestComments(
+    workspace: string,
+    repository: string,
+    pullRequestId: number,
+    comments: PullRequestCreateComment[],
+  ): Promise<void> {
+    const promises = comments.map((comment) => this.createPullRequestComment(workspace, repository, pullRequestId, comment));
+    await Promise.all(promises);
   }
 }
