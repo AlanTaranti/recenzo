@@ -1,7 +1,8 @@
-import { BitBucketPrComment, BitbucketService } from '~/services/bitbucket-service';
+import { BitbucketService } from '~/services/bitbucket-service';
+import { PullRequestComment, PullRequestCreateComment } from '~/repositories/bitbucket-repository';
 
 interface IReviewerAgentService {
-  review: (diff: string, currentComments?: BitBucketPrComment[], codeReviewInstruction?: string) => Promise<BitBucketPrComment[]>;
+  review: (diff: string, currentComments?: PullRequestComment[], codeReviewInstruction?: string) => Promise<PullRequestCreateComment[]>;
 }
 
 type PrInfo = {
@@ -17,9 +18,12 @@ export class ReviewPrUseCase {
     private readonly bitbucketService: BitbucketService,
   ) {}
 
-  public async reviewPullRequest(prInfo: PrInfo): Promise<void> {
-    const diff = await this.bitbucketService.getPullRequestDiff(prInfo.workspace, prInfo.repository, prInfo.prNumber, prInfo.ignoredFiles);
-    const codeReviewResult = await this.reviewerAgentService.review(diff);
+  public async reviewPullRequest(prInfo: PrInfo, codeReviewInstruction?: string): Promise<void> {
+    const [diff, currentComments] = await Promise.all([
+      this.bitbucketService.getPullRequestDiff(prInfo.workspace, prInfo.repository, prInfo.prNumber, prInfo.ignoredFiles),
+      this.bitbucketService.listPullRequestsComments(prInfo.workspace, prInfo.repository, prInfo.prNumber),
+    ]);
+    const codeReviewResult = await this.reviewerAgentService.review(diff, currentComments, codeReviewInstruction);
     await this.bitbucketService.createPullRequestComments(prInfo.workspace, prInfo.repository, prInfo.prNumber, codeReviewResult);
   }
 }

@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ReviewPrUseCase } from '~/use-cases/review-pr-use-case';
 import { BitbucketService } from '~/services/bitbucket-service';
+import { PullRequestComment } from '~/repositories/bitbucket-repository';
 
 describe('ReviewPrUseCase', () => {
   // Mock dependencies
@@ -13,9 +14,11 @@ describe('ReviewPrUseCase', () => {
   const mockBitbucketService = {
     getPullRequestDiff: vi.fn(),
     createPullRequestComments: vi.fn(),
+    listPullRequestsComments: vi.fn(),
   } as unknown as BitbucketService & {
     getPullRequestDiff: ReturnType<typeof vi.fn>;
     createPullRequestComments: ReturnType<typeof vi.fn>;
+    listPullRequestsComments: ReturnType<typeof vi.fn>;
   };
 
   let reviewPrUseCase: ReviewPrUseCase;
@@ -40,7 +43,9 @@ describe('ReviewPrUseCase', () => {
       const mockDiff = 'test diff content';
       const mockComments = [{ comment: 'Test comment', filepath: 'test.ts', line: 10 }];
 
+      const mockCurrentComments: PullRequestComment[] = [];
       mockBitbucketService.getPullRequestDiff.mockResolvedValue(mockDiff);
+      mockBitbucketService.listPullRequestsComments.mockResolvedValue(mockCurrentComments);
       mockReviewerAgentService.review.mockResolvedValue(mockComments);
       mockBitbucketService.createPullRequestComments.mockResolvedValue(undefined);
 
@@ -49,9 +54,8 @@ describe('ReviewPrUseCase', () => {
 
       // Verify
       expect(mockBitbucketService.getPullRequestDiff).toHaveBeenCalledWith('test-workspace', 'test-repo', 123, undefined);
-
-      expect(mockReviewerAgentService.review).toHaveBeenCalledWith(mockDiff);
-
+      expect(mockBitbucketService.listPullRequestsComments).toHaveBeenCalledWith('test-workspace', 'test-repo', 123);
+      expect(mockReviewerAgentService.review).toHaveBeenCalledWith(mockDiff, mockCurrentComments, undefined);
       expect(mockBitbucketService.createPullRequestComments).toHaveBeenCalledWith('test-workspace', 'test-repo', 123, mockComments);
     });
 
@@ -66,8 +70,10 @@ describe('ReviewPrUseCase', () => {
 
       const mockDiff = 'test diff content';
       const mockComments = [{ comment: 'Test comment', filepath: 'test.ts', line: 10 }];
+      const mockCurrentComments: PullRequestComment[] = [];
 
       mockBitbucketService.getPullRequestDiff.mockResolvedValue(mockDiff);
+      mockBitbucketService.listPullRequestsComments.mockResolvedValue(mockCurrentComments);
       mockReviewerAgentService.review.mockResolvedValue(mockComments);
       mockBitbucketService.createPullRequestComments.mockResolvedValue(undefined);
 
@@ -79,6 +85,8 @@ describe('ReviewPrUseCase', () => {
         'package-lock.json',
         'yarn.lock',
       ]);
+      expect(mockBitbucketService.listPullRequestsComments).toHaveBeenCalledWith('test-workspace', 'test-repo', 123);
+      expect(mockReviewerAgentService.review).toHaveBeenCalledWith(mockDiff, mockCurrentComments, undefined);
     });
 
     it('should handle errors from getPullRequestDiff', async () => {
@@ -91,9 +99,11 @@ describe('ReviewPrUseCase', () => {
 
       const error = new Error('Failed to get PR diff');
       mockBitbucketService.getPullRequestDiff.mockRejectedValue(error);
+      mockBitbucketService.listPullRequestsComments.mockResolvedValue([]);
 
       // Execute & Verify
       await expect(reviewPrUseCase.reviewPullRequest(prInfo)).rejects.toThrow('Failed to get PR diff');
+      expect(mockBitbucketService.listPullRequestsComments).toHaveBeenCalledWith('test-workspace', 'test-repo', 123);
       expect(mockReviewerAgentService.review).not.toHaveBeenCalled();
       expect(mockBitbucketService.createPullRequestComments).not.toHaveBeenCalled();
     });
@@ -107,14 +117,17 @@ describe('ReviewPrUseCase', () => {
       };
 
       const mockDiff = 'test diff content';
+      const mockCurrentComments: PullRequestComment[] = [];
       const error = new Error('Failed to review PR');
 
       mockBitbucketService.getPullRequestDiff.mockResolvedValue(mockDiff);
+      mockBitbucketService.listPullRequestsComments.mockResolvedValue(mockCurrentComments);
       mockReviewerAgentService.review.mockRejectedValue(error);
 
       // Execute & Verify
       await expect(reviewPrUseCase.reviewPullRequest(prInfo)).rejects.toThrow('Failed to review PR');
       expect(mockBitbucketService.getPullRequestDiff).toHaveBeenCalled();
+      expect(mockBitbucketService.listPullRequestsComments).toHaveBeenCalled();
       expect(mockBitbucketService.createPullRequestComments).not.toHaveBeenCalled();
     });
 
@@ -127,17 +140,20 @@ describe('ReviewPrUseCase', () => {
       };
 
       const mockDiff = 'test diff content';
+      const mockCurrentComments: PullRequestComment[] = [];
       const mockComments = [{ comment: 'Test comment', filepath: 'test.ts', line: 10 }];
       const error = new Error('Failed to create PR comment');
 
       mockBitbucketService.getPullRequestDiff.mockResolvedValue(mockDiff);
+      mockBitbucketService.listPullRequestsComments.mockResolvedValue(mockCurrentComments);
       mockReviewerAgentService.review.mockResolvedValue(mockComments);
       mockBitbucketService.createPullRequestComments.mockRejectedValue(error);
 
       // Execute & Verify
       await expect(reviewPrUseCase.reviewPullRequest(prInfo)).rejects.toThrow('Failed to create PR comment');
       expect(mockBitbucketService.getPullRequestDiff).toHaveBeenCalled();
-      expect(mockReviewerAgentService.review).toHaveBeenCalled();
+      expect(mockBitbucketService.listPullRequestsComments).toHaveBeenCalled();
+      expect(mockReviewerAgentService.review).toHaveBeenCalledWith(mockDiff, mockCurrentComments, undefined);
     });
   });
 });
