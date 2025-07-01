@@ -1,8 +1,9 @@
+import { File } from 'gitdiff-parser';
 import { BitbucketService } from '~/services/bitbucket-service';
 import { PullRequestComment, PullRequestCreateComment } from '~/repositories/bitbucket-repository';
 
 interface IReviewerAgentService {
-  review: (diff: string, currentComments?: PullRequestComment[], codeReviewInstruction?: string) => Promise<PullRequestCreateComment[]>;
+  review: (diff: File[], currentComments?: PullRequestComment[], codeReviewInstruction?: string) => Promise<PullRequestCreateComment[]>;
 }
 
 type PrInfo = {
