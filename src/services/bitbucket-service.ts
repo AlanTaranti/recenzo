@@ -1,32 +1,33 @@
+import gitDiffParser, { File } from 'gitdiff-parser';
+
 import { BitbucketRepository, PullRequestComment, PullRequestCreateComment } from '~/repositories/bitbucket-repository';
 
 export class BitbucketService {
   constructor(private readonly bitbucketRepository: BitbucketRepository) {}
 
-  public async getPullRequestDiff(workspace: string, repository: string, pullRequestId: number, ignoredFiles?: string[]): Promise<string> {
+  public async getPullRequestDiff(workspace: string, repository: string, pullRequestId: number, ignoredFiles?: string[]): Promise<File[]> {
     const pullRequest = await this.bitbucketRepository.getPullRequest(workspace, repository, pullRequestId);
-    const diff = await this.bitbucketRepository.getSourceCodeDiff(
+    const diffText = await this.bitbucketRepository.getSourceCodeDiff(
       workspace,
       repository,
       pullRequest.source.commit.hash,
       pullRequest.destination.commit.hash,
     );
-    const parsedDiff = this.removeFilesFromDiff(diff, ignoredFiles);
+    const annotedDiff = this.annotateDiffWithLineNumbers(diffText);
 
-    return this.annotateDiff(parsedDiff);
+    return this.removeFilesFromDiff(annotedDiff, ignoredFiles);
   }
 
   public async listPullRequestsComments(workspace: string, repository: string, pullRequestId: number): Promise<PullRequestComment[]> {
     return this.bitbucketRepository.listPullRequestsComments(workspace, repository, pullRequestId);
   }
 
-  private removeFilesFromDiff(diff: string, ignoredFiles?: string[]): string {
-    void ignoredFiles;
-    return diff;
+  private removeFilesFromDiff(files: File[], ignoredFiles?: string[]): File[] {
+    return files.filter((file) => !ignoredFiles?.includes(file.newPath) && !ignoredFiles?.includes(file.oldPath));
   }
 
-  private annotateDiff(diff: string): string {
-    return diff;
+  private annotateDiffWithLineNumbers(diffText: string): File[] {
+    return gitDiffParser.parse(diffText);
   }
 
   public async createPullRequestComments(
