@@ -108,7 +108,7 @@ export class BitbucketRepository {
     sourceCommitHash: string,
     destinationCommitHash: string,
   ): Promise<string> {
-    const url = `${this.baseUrl}${workspace}/${repository}/diff/${sourceCommitHash}...${destinationCommitHash}?binary=false`;
+    const url = `${this.baseUrl}${workspace}/${repository}/diff/${sourceCommitHash}..${destinationCommitHash}?binary=false`;
 
     const response = await fetch(url, {
       method: 'GET',

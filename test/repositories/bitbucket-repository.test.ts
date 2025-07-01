@@ -79,7 +79,7 @@ describe('BitbucketRepository', () => {
 
       // Verify
       expect(global.fetch).toHaveBeenCalledWith(
-        'https://api.bitbucket.org/2.0/repositories/workspace/repo/diff/source-hash...dest-hash?binary=false',
+        'https://api.bitbucket.org/2.0/repositories/workspace/repo/diff/source-hash..dest-hash?binary=false',
         {
           method: 'GET',
           headers: {
