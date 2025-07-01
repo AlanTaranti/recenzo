@@ -1,10 +1,5 @@
-import { File } from 'gitdiff-parser';
 import { BitbucketService } from '~/services/bitbucket-service';
-import { PullRequestComment, PullRequestCreateComment } from '~/repositories/bitbucket-repository';
-
-interface IReviewerAgentService {
-  review: (diff: File[], currentComments?: PullRequestComment[], codeReviewInstruction?: string) => Promise<PullRequestCreateComment[]>;
-}
+import { ReviewerAgentService } from '~/services/reviewer-agent-service';
 
 type PrInfo = {
   workspace: string;
@@ -15,7 +10,7 @@ type PrInfo = {
 
 export class ReviewPrUseCase {
   constructor(
-    private readonly reviewerAgentService: IReviewerAgentService,
+    private readonly reviewerAgentService: ReviewerAgentService,
     private readonly bitbucketService: BitbucketService,
   ) {}
 
