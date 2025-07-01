@@ -126,21 +126,56 @@ describe('BitbucketRepository', () => {
     });
   });
   describe('getPullRequest', () => {
+    const mockPrResponse = {
+      type: '<string>',
+      links: {
+        self: { href: '<string>', name: '<string>' },
+        html: { href: '<string>', name: '<string>' },
+        commits: { href: '<string>', name: '<string>' },
+        approve: { href: '<string>', name: '<string>' },
+        diff: { href: '<string>', name: '<string>' },
+        diffstat: { href: '<string>', name: '<string>' },
+        comments: { href: '<string>', name: '<string>' },
+        activity: { href: '<string>', name: '<string>' },
+        merge: { href: '<string>', name: '<string>' },
+        decline: { href: '<string>', name: '<string>' },
+      },
+      id: 108,
+      title: '<string>',
+      rendered: {
+        title: { raw: '<string>', markup: 'markdown', html: '<string>' },
+        description: { raw: '<string>', markup: 'markdown', html: '<string>' },
+        reason: { raw: '<string>', markup: 'markdown', html: '<string>' },
+      },
+      summary: { raw: '<string>', markup: 'markdown', html: '<string>' },
+      state: 'OPEN',
+      author: { type: '<string>' },
+      source: {
+        repository: { type: '<string>' },
+        branch: { name: '<string>', merge_strategies: ['merge_commit'], default_merge_strategy: '<string>' },
+        commit: { hash: '<string>' },
+      },
+      destination: {
+        repository: { type: '<string>' },
+        branch: { name: '<string>', merge_strategies: ['merge_commit'], default_merge_strategy: '<string>' },
+        commit: { hash: '<string>' },
+      },
+      merge_commit: { hash: '<string>' },
+      comment_count: 51,
+      task_count: 53,
+      close_source_branch: true,
+      closed_by: { type: '<string>' },
+      reason: '<string>',
+      created_on: '<string>',
+      updated_on: '<string>',
+      reviewers: [{ type: '<string>' }],
+      participants: [{ type: '<string>' }],
+      draft: true,
+      queued: true,
+    };
+
     it('should fetch pull request from Bitbucket API with correct URL and headers', async () => {
       // Setup
-      const mockPrResponse = {
-        id: 123,
-        destination: {
-          commit: {
-            hash: 'dest-hash',
-          },
-        },
-        source: {
-          commit: {
-            hash: 'source-hash',
-          },
-        },
-      };
       const mockResponse = new Response(JSON.stringify(mockPrResponse));
       const mockedFetch = global.fetch as unknown as ReturnType<typeof vi.fn>;
       mockedFetch.mockResolvedValue(mockResponse);
@@ -163,19 +198,6 @@ describe('BitbucketRepository', () => {
 
     it('should use token from options for authorization header', async () => {
       // Setup
-      const mockPrResponse = {
-        id: 123,
-        destination: {
-          commit: {
-            hash: 'dest-hash',
-          },
-        },
-        source: {
-          commit: {
-            hash: 'source-hash',
-          },
-        },
-      };
       const mockResponse = new Response(JSON.stringify(mockPrResponse));
       const mockedFetch = global.fetch as unknown as ReturnType<typeof vi.fn>;
       mockedFetch.mockResolvedValue(mockResponse);
@@ -223,6 +245,166 @@ describe('BitbucketRepository', () => {
 
       // Verify
       expect(result).toEqual({ error: 'Not found' });
+    });
+  });
+  describe('listPullRequestsComments', () => {
+    it('should fetch comments from Bitbucket API with correct URL and headers (single page)', async () => {
+      // Setup
+      const mockCommentsResponse = {
+        values: [
+          {
+            id: 1,
+            content: {
+              raw: 'Comment 1',
+            },
+          },
+          {
+            id: 2,
+            content: {
+              raw: 'Comment 2',
+            },
+            inline: {
+              to: 10,
+              path: 'src/file.ts',
+            },
+          },
+        ],
+      };
+      const mockResponse = new Response(JSON.stringify(mockCommentsResponse));
+      const mockedFetch = global.fetch as unknown as ReturnType<typeof vi.fn>;
+      mockedFetch.mockResolvedValue(mockResponse);
+
+      process.env['BITBUCKET_ACCESS_TOKEN'] = 'test-token';
+      const repository = new BitbucketRepository();
+
+      // Execute
+      const result = await repository.listPullRequestsComments('workspace', 'repo', 123);
+
+      // Verify
+      expect(global.fetch).toHaveBeenCalledWith(
+        'https://api.bitbucket.org/2.0/repositories/workspace/repo/pullrequests/123/comments/?page=1&pagelen=50',
+        {
+          method: 'GET',
+          headers: {
+            Authorization: 'Bearer test-token',
+          },
+        },
+      );
+      expect(result).toEqual(mockCommentsResponse.values);
+    });
+
+    it('should handle pagination and fetch all comments across multiple pages', async () => {
+      // Setup
+      const mockFirstPageResponse = {
+        values: Array.from({ length: 50 }, (_, i) => ({
+          id: i + 1,
+          content: {
+            raw: `Comment ${(i + 1).toString()}`,
+          },
+        })),
+      };
+      const mockSecondPageResponse = {
+        values: Array.from({ length: 25 }, (_, i) => ({
+          id: i + 51,
+          content: {
+            raw: `Comment ${(i + 51).toString()}`,
+          },
+        })),
+      };
+
+      const mockedFetch = global.fetch as unknown as ReturnType<typeof vi.fn>;
+      mockedFetch
+        .mockResolvedValueOnce(new Response(JSON.stringify(mockFirstPageResponse)))
+        .mockResolvedValueOnce(new Response(JSON.stringify(mockSecondPageResponse)));
+
+      process.env['BITBUCKET_ACCESS_TOKEN'] = 'test-token';
+      const repository = new BitbucketRepository();
+
+      // Execute
+      const result = await repository.listPullRequestsComments('workspace', 'repo', 123);
+
+      // Verify
+      expect(global.fetch).toHaveBeenCalledTimes(2);
+      expect(global.fetch).toHaveBeenNthCalledWith(
+        1,
+        'https://api.bitbucket.org/2.0/repositories/workspace/repo/pullrequests/123/comments/?page=1&pagelen=50',
+        expect.any(Object),
+      );
+      expect(global.fetch).toHaveBeenNthCalledWith(
+        2,
+        'https://api.bitbucket.org/2.0/repositories/workspace/repo/pullrequests/123/comments/?page=2&pagelen=50',
+        expect.any(Object),
+      );
+
+      // Should combine results from both pages
+      expect(result.length).toBe(75);
+      expect(result[0]?.id).toBe(1);
+      expect(result[74]?.id).toBe(75);
+    });
+
+    it('should handle empty response (no comments)', async () => {
+      // Setup
+      const mockEmptyResponse = {
+        values: [],
+      };
+      const mockResponse = new Response(JSON.stringify(mockEmptyResponse));
+      const mockedFetch = global.fetch as unknown as ReturnType<typeof vi.fn>;
+      mockedFetch.mockResolvedValue(mockResponse);
+
+      process.env['BITBUCKET_ACCESS_TOKEN'] = 'test-token';
+      const repository = new BitbucketRepository();
+
+      // Execute
+      const result = await repository.listPullRequestsComments('workspace', 'repo', 123);
+
+      // Verify
+      expect(global.fetch).toHaveBeenCalledTimes(1);
+      expect(result).toEqual([]);
+    });
+
+    it('should use token from options for authorization header', async () => {
+      // Setup
+      const mockCommentsResponse = {
+        values: [
+          {
+            id: 1,
+            content: {
+              raw: 'Comment 1',
+            },
+          },
+        ],
+      };
+      const mockResponse = new Response(JSON.stringify(mockCommentsResponse));
+      const mockedFetch = global.fetch as unknown as ReturnType<typeof vi.fn>;
+      mockedFetch.mockResolvedValue(mockResponse);
+
+      const options = { bitbucket_access_token: 'options-token' };
+      const repository = new BitbucketRepository(options);
+
+      // Execute
+      await repository.listPullRequestsComments('workspace', 'repo', 123);
+
+      // Verify
+      expect(global.fetch).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          headers: {
+            Authorization: 'Bearer options-token',
+          },
+        }),
+      );
+    });
+
+    it('should handle fetch errors properly', async () => {
+      // Setup
+      const mockedFetch = global.fetch as unknown as ReturnType<typeof vi.fn>;
+      mockedFetch.mockRejectedValue(new Error('Network error'));
+
+      process.env['BITBUCKET_ACCESS_TOKEN'] = 'test-token';
+      const repository = new BitbucketRepository();
+
+      // Execute & Verify
+      await expect(repository.listPullRequestsComments('workspace', 'repo', 123)).rejects.toThrow('Network error');
     });
   });
 });
