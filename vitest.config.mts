@@ -7,6 +7,7 @@ export default defineConfig({
     },
   },
   test: {
+    dir: 'test',
     coverage: {
       thresholds: {
         lines: 80,
