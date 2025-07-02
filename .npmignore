@@ -1,0 +1,7 @@
+/.vscode/
+/src/
+/test/
+/*.*
+coverage/
+dist/test
+reports
