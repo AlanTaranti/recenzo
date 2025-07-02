@@ -22,7 +22,7 @@ export class ReviewPrUseCase {
   public async reviewPullRequest(
     pullRequestInfo: PullRequestInfo,
     codeReviewInstruction: CodeReviewInstruction,
-    options: ReviewPrOptions,
+    options?: ReviewPrOptions,
   ): Promise<void> {
     const [diff, currentComments] = await Promise.all([
       this.bitbucketService.getPullRequestDiff(
@@ -37,7 +37,7 @@ export class ReviewPrUseCase {
     const codeReviewResult = await this.reviewerAgentService.review(codeReviewInstruction, diff, currentComments);
     const comments = this.mapAgentCommentsToPullRequestComments(codeReviewResult);
 
-    if (options.dryRun) {
+    if (options?.dryRun) {
       console.log('Dry run mode. No comments will be created.');
       console.log('Comments to be created:');
       comments.forEach((comment) => {
