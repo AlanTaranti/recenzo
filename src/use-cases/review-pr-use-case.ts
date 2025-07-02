@@ -2,14 +2,14 @@ import { BitbucketService } from '~/services/bitbucket-service';
 import { CodeReviewInstruction, ReviewerAgentService } from '~/services/reviewer-agent-service';
 import { PullRequestCreateComment } from '~/repositories/bitbucket-repository';
 
-type PullRequestInfo = {
+export type PullRequestInfo = {
   workspace: string;
   repository: string;
   prNumber: number;
   ignoredFiles?: string[];
 };
 
-type Options = {
+export type ReviewPrOptions = {
   dryRun?: boolean;
 };
 
@@ -22,7 +22,7 @@ export class ReviewPrUseCase {
   public async reviewPullRequest(
     pullRequestInfo: PullRequestInfo,
     codeReviewInstruction: CodeReviewInstruction,
-    options: Options,
+    options: ReviewPrOptions,
   ): Promise<void> {
     const [diff, currentComments] = await Promise.all([
       this.bitbucketService.getPullRequestDiff(
