@@ -9,6 +9,7 @@ export default defineConfig({
   test: {
     dir: 'test',
     coverage: {
+      reporter: ['text', 'lcov'],
       thresholds: {
         lines: 80,
         functions: 80,
