@@ -1,5 +1,8 @@
 # Recenzo
 
+[![npm version](https://img.shields.io/npm/v/@taranti/recenzo.svg)](https://www.npmjs.org/package/@taranti/recenzo)
+[![install size](https://img.shields.io/badge/dynamic/json?url=https://packagephobia.com/v2/api.json?p=@taranti/recenzo&query=$.install.pretty&label=install%20size)](https://packagephobia.now.sh/result?p=@taranti/recenzo)
+[![npm bundle size](https://img.shields.io/bundlephobia/minzip/@taranti/recenzo)](https://bundlephobia.com/package/@taranti/recenzo@latest)
 ![Maintenance](https://img.shields.io/maintenance/yes/2025)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](CODE_OF_CONDUCT.md)
 [![License](https://img.shields.io/github/license/AlanTaranti/recenzo.svg)](LICENSE)
