@@ -1,11 +1,16 @@
 import { BitbucketService } from '~/services/bitbucket-service';
-import { ReviewerAgentService } from '~/services/reviewer-agent-service';
+import { CodeReviewInstruction, ReviewerAgentService } from '~/services/reviewer-agent-service';
+import { PullRequestCreateComment } from '~/repositories/bitbucket-repository';
 
-type PrInfo = {
+type PullRequestInfo = {
   workspace: string;
   repository: string;
   prNumber: number;
   ignoredFiles?: string[];
+};
+
+type Options = {
+  dryRun?: boolean;
 };
 
 export class ReviewPrUseCase {
@@ -14,12 +19,58 @@ export class ReviewPrUseCase {
     private readonly bitbucketService: BitbucketService,
   ) {}
 
-  public async reviewPullRequest(prInfo: PrInfo, codeReviewInstruction?: string): Promise<void> {
+  public async reviewPullRequest(
+    pullRequestInfo: PullRequestInfo,
+    codeReviewInstruction: CodeReviewInstruction,
+    options: Options,
+  ): Promise<void> {
     const [diff, currentComments] = await Promise.all([
-      this.bitbucketService.getPullRequestDiff(prInfo.workspace, prInfo.repository, prInfo.prNumber, prInfo.ignoredFiles),
-      this.bitbucketService.listPullRequestsComments(prInfo.workspace, prInfo.repository, prInfo.prNumber),
+      this.bitbucketService.getPullRequestDiff(
+        pullRequestInfo.workspace,
+        pullRequestInfo.repository,
+        pullRequestInfo.prNumber,
+        pullRequestInfo.ignoredFiles,
+      ),
+      this.bitbucketService.listPullRequestsComments(pullRequestInfo.workspace, pullRequestInfo.repository, pullRequestInfo.prNumber),
     ]);
-    const codeReviewResult = await this.reviewerAgentService.review(diff, currentComments, codeReviewInstruction);
-    await this.bitbucketService.createPullRequestComments(prInfo.workspace, prInfo.repository, prInfo.prNumber, codeReviewResult);
+
+    const codeReviewResult = await this.reviewerAgentService.review(codeReviewInstruction, diff, currentComments);
+    const comments = this.mapAgentCommentsToPullRequestComments(codeReviewResult);
+
+    if (options.dryRun) {
+      console.log('Dry run mode. No comments will be created.');
+      console.log('Comments to be created:');
+      comments.forEach((comment) => {
+        console.log(JSON.stringify(comment, null, 2) + '\n');
+      });
+      return;
+    }
+
+    await this.bitbucketService.createPullRequestComments(
+      pullRequestInfo.workspace,
+      pullRequestInfo.repository,
+      pullRequestInfo.prNumber,
+      comments,
+    );
+  }
+
+  private mapAgentCommentsToPullRequestComments(
+    agentComments: Awaited<ReturnType<ReviewerAgentService['review']>>,
+  ): PullRequestCreateComment[] {
+    if (!agentComments) {
+      return [];
+    }
+
+    return agentComments.comments.map((comment) => {
+      return {
+        content: {
+          raw: comment.comment,
+        },
+        inline: {
+          to: comment.commentLine,
+          path: comment.filepath,
+        },
+      };
+    });
   }
 }
