@@ -5,6 +5,9 @@
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
   "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "dist": "tsc && tsc-alias",
     "prepublishOnly": "npm run test && npm run dist",
