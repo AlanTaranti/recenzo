@@ -31,6 +31,17 @@ yarn add @taranti/recenzo
 
 ## Usage
 
+### Environment Variables
+
+Before using Recenzo, you need to set up the following environment variables:
+
+- `BITBUCKET_ACCESS_TOKEN`: Required for Bitbucket API access
+  - [Learn more about Bitbucket Access Tokens](https://support.atlassian.com/bitbucket-cloud/docs/access-tokens/)
+- `OPENAI_API_KEY`: Required for AI-powered code reviews
+  - [Learn more about OpenAI API Keys](https://platform.openai.com/docs/overview)
+
+You can set these in your environment or use a `.env` file.
+
 ### Node
 
 ```typescript
