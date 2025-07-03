@@ -3,9 +3,18 @@
 [![npm version](https://img.shields.io/npm/v/@taranti/recenzo.svg)](https://www.npmjs.org/package/@taranti/recenzo)
 [![install size](https://img.shields.io/badge/dynamic/json?url=https://packagephobia.com/v2/api.json?p=@taranti/recenzo&query=$.install.pretty&label=install%20size)](https://packagephobia.now.sh/result?p=@taranti/recenzo)
 [![npm bundle size](https://img.shields.io/bundlephobia/minzip/@taranti/recenzo)](https://bundlephobia.com/package/@taranti/recenzo@latest)
+
 ![Maintenance](https://img.shields.io/maintenance/yes/2025)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](CODE_OF_CONDUCT.md)
 [![License](https://img.shields.io/github/license/AlanTaranti/recenzo.svg)](LICENSE)
+
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=AlanTaranti_recenzo&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=AlanTaranti_recenzo)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=AlanTaranti_recenzo&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=AlanTaranti_recenzo)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=AlanTaranti_recenzo&metric=coverage)](https://sonarcloud.io/summary/new_code?id=AlanTaranti_recenzo)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=AlanTaranti_recenzo&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=AlanTaranti_recenzo)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=AlanTaranti_recenzo&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=AlanTaranti_recenzo)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=AlanTaranti_recenzo&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=AlanTaranti_recenzo)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=AlanTaranti_recenzo&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=AlanTaranti_recenzo)
 
 Recenzo is a JS/TS library for custom AI powered Bitbucket code reviews. Fetch PR diffs, analyze changes, and automate reviewer feedback to enforce standards.
 
