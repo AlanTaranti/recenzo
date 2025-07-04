@@ -57,7 +57,7 @@ You can set these in your environment or use a `.env` file.
 ### Node
 
 ```typescript
-import { reviewPullRequest } from '@taranti/recenzo';
+import recenzo from '@taranti/recenzo';
 
 // Pull request information
 const pullRequestInfo = {
@@ -80,10 +80,10 @@ const options = {
 
 // Review the pull request
 // The options parameter is optional and can be omitted
-await reviewPullRequest(pullRequestInfo, codeReviewInstruction, options);
+await recenzo.reviewPullRequest(pullRequestInfo, codeReviewInstruction, options);
 
 // Or without options
-await reviewPullRequest(pullRequestInfo, codeReviewInstruction);
+await recenzo.reviewPullRequest(pullRequestInfo, codeReviewInstruction);
 ```
 
 ## Contributing
