@@ -1,13 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ReviewPrUseCase } from '~/use-cases/review-pr-use-case';
 import { BitbucketService } from '~/services/bitbucket-service';
+import { ReviewerAgentService } from '~/services/reviewer-agent-service';
 import { PullRequestComment } from '~/repositories/bitbucket-repository';
 
 describe('ReviewPrUseCase', () => {
   // Mock dependencies
   const mockReviewerAgentService = {
     review: vi.fn(),
-  } as {
+  } as unknown as ReviewerAgentService & {
     review: ReturnType<typeof vi.fn>;
   };
 
