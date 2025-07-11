@@ -75,9 +75,10 @@ export class ReviewerAgentService {
       * Avoid repeating feedback: do **not** include any comment similar to what has already been made.
       
       **5. Tone & Formatting**
-      * **Be concise**: one or two sentences per issue.
+      * **Be concise**: typically one to three sentences per issue (excluding code suggestions), but adjust as needed for clarity or complexity.
       * **Be kind**: frame feedback as suggestions (“Consider extracting…” rather than “You must…”).
       * Use **Markdown** for all comment text—wrap suggestions in backticks for code references, use bullet lists as needed.
+      * When applicable, include a concise code snippet demonstrating your recommendation. The snippet must be formatted as a proper Markdown code block
       
       **6. Questions & Clarifications**
       * If a change’s intent is unclear, ask a focused question: “What is the intended behavior when input X is empty?”
