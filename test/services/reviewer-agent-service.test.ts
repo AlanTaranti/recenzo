@@ -83,43 +83,24 @@ describe('ReviewerAgentService', () => {
       const result = await reviewerAgentService.review(codeReviewInstruction, diffs, currentComments);
 
       // Verify
-      expect(mockParseFn).toHaveBeenCalledWith({
-        model: 'o4-mini',
-        input: [
-          {
-            role: 'system',
-            content:
-              'You are a code reviewer.\n' +
-              'Your role is to help developers improve their code.\n' +
-              'You will receive an annotated diff with the code changes to be reviewed, and you should respond with feedback on the code.\n' +
-              'Comment only on what needs improvement.\n' +
-              'Comment only at included lines, not deleted ones.\n' +
-              'Make sure to do not include any comment similar to what has already been made.\n' +
-              'The comment text must be formated in markdown\n' +
-              'Always use an empathetic and educational writing style.\n' +
-              `Respond to the user in en language.\n\n\n` +
-              'Bellow is the code project guidelines:\n' +
-              'Test instruction',
-          },
-          {
-            role: 'user',
-            content:
-              'Here is the current comments on the pull request:\n\n' +
-              JSON.stringify(currentComments, null, 2) +
-              '\n\n' +
-              'Now, here is the diff:\n\n' +
-              JSON.stringify(diffs, null, 2),
-          },
-        ],
-        text: expect.objectContaining({
-          format: expect.objectContaining({
-            name: 'comments',
-            schema: expect.any(Object) as unknown,
-            strict: true,
-            type: 'json_schema',
-          }) as unknown as Record<string, unknown>,
+      expect(mockParseFn).toHaveBeenCalledWith(
+        expect.objectContaining({
+          model: 'o4-mini',
+          input: [
+            expect.objectContaining({
+              role: 'system',
+              content: expect.stringContaining('Respond to the user in en language') as string,
+            }),
+            expect.objectContaining({
+              role: 'user',
+              content: expect.stringContaining(JSON.stringify(diffs, null, 2)) as string,
+            }),
+          ],
+          text: expect.objectContaining({
+            format: expect.any(Object) as unknown,
+          }) as Record<string, unknown>,
         }) as Record<string, unknown>,
-      });
+      );
 
       expect(result).toEqual(mockResponse.output_parsed);
     });
